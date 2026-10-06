@@ -28,10 +28,11 @@ public class JobController {
 
         JobResponse response =
                 jobService.createJob(request);
+        JobResponse currentState = jobService.getJob(response.id());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(response);
+                .body(currentState);
     }
 
     @GetMapping("/{id}")

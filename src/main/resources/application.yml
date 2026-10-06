@@ -3,9 +3,9 @@ spring:
     name: taskflow
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/taskflow
-    username: taskflow
-    password: taskflow
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/taskflow}
+    username: ${DB_USERNAME:taskflow}
+    password: ${DB_PASSWORD:taskflow}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -18,15 +18,37 @@ spring:
       hibernate:
         format_sql: true
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: taskflow-workers
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 server:
   port: 8080
+
+taskflow:
+  kafka:
+    topic: taskflow-jobs
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-
   endpoint:
     health:
       show-details: ALWAYS
+
+---
+spring:
+  config:
+    activate:
+      on-profile: worker
+  main:
+    web-application-type: none

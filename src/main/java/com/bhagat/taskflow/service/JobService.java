@@ -11,6 +11,7 @@ import com.bhagat.taskflow.exception.JobNotFoundException;
 import com.bhagat.taskflow.repository.JobRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,13 +22,16 @@ public class JobService {
 
     private final JobRepository jobRepository;
     private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public JobService(
             JobRepository jobRepository,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.jobRepository = jobRepository;
         this.objectMapper = objectMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -59,6 +63,7 @@ public class JobService {
         job.setCreatedAt(Instant.now());
 
         Job savedJob = jobRepository.save(job);
+        eventPublisher.publishEvent(new JobCreatedEvent(savedJob.getId()));
 
         return toResponse(savedJob);
     }
