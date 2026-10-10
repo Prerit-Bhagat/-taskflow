@@ -26,22 +26,26 @@ public class JobWorker {
         UUID jobId = UUID.fromString(message);
         Job job = jobLifecycleService.start(jobId);
         if (job == null) {
-            log.info("Ignoring duplicate or non-queued message jobId={}", jobId);
+            log.info("Ignoring duplicate or non-queued message jobId={} workerThread={}",
+                    jobId, Thread.currentThread().getName());
             return;
         }
 
         try {
             execute(job);
             jobLifecycleService.complete(jobId);
-            log.info("JOB_COMPLETED jobId={} jobType={}", jobId, job.getJobType());
+            log.info("JOB_COMPLETED jobId={} jobType={} workerThread={}",
+                    jobId, job.getJobType(), Thread.currentThread().getName());
         } catch (RuntimeException exception) {
             jobLifecycleService.fail(jobId, exception.getMessage());
-            log.error("JOB_FAILED jobId={} jobType={}", jobId, job.getJobType(), exception);
+            log.error("JOB_FAILED jobId={} jobType={} workerThread={}",
+                    jobId, job.getJobType(), Thread.currentThread().getName(), exception);
         }
     }
 
     private void execute(Job job) {
         // Phase 2 establishes the worker lifecycle; domain-specific executors are added in Phase 3.
-        log.info("Executing job jobId={} jobType={}", job.getId(), job.getJobType());
+        log.info("Executing job jobId={} jobType={} workerThread={}",
+                job.getId(), job.getJobType(), Thread.currentThread().getName());
     }
 }

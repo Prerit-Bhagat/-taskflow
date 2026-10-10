@@ -61,6 +61,8 @@ services:
     build: .
     environment:
       SPRING_PROFILES_ACTIVE: worker
+      WORKER_CONCURRENCY: 3
+      WORKER_SHUTDOWN_TIMEOUT: 30s
       DB_URL: jdbc:postgresql://postgres:5432/taskflow
       DB_USERNAME: taskflow
       DB_PASSWORD: taskflow
@@ -70,6 +72,7 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+    stop_grace_period: 30s
 
 volumes:
   postgres_data:

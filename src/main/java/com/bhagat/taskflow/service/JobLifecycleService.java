@@ -42,14 +42,16 @@ public class JobLifecycleService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Job start(UUID jobId) {
-        Job job = jobRepository.findById(jobId).orElse(null);
-        if (job == null || job.getStatus() != JobStatus.QUEUED) {
+        int updatedRows = jobRepository.claimForProcessing(
+                jobId,
+                JobStatus.QUEUED,
+                JobStatus.RUNNING,
+                Instant.now()
+        );
+        if (updatedRows == 0) {
             return null;
         }
-        job.setStatus(JobStatus.RUNNING);
-        job.setStartedAt(Instant.now());
-        job.setAttemptCount(job.getAttemptCount() + 1);
-        return jobRepository.save(job);
+        return find(jobId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

@@ -35,6 +35,9 @@ server:
 taskflow:
   kafka:
     topic: taskflow-jobs
+  worker:
+    concurrency: ${WORKER_CONCURRENCY:3}
+    shutdown-timeout: ${WORKER_SHUTDOWN_TIMEOUT:30s}
 
 management:
   endpoints:
@@ -51,4 +54,6 @@ spring:
     activate:
       on-profile: worker
   main:
-    web-application-type: none
+    web-application-type: NONE
+  lifecycle:
+    timeout-per-shutdown-phase: ${WORKER_SHUTDOWN_TIMEOUT:30s}
